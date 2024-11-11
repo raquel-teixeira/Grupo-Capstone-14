@@ -1,0 +1,226 @@
+---
+title: "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira"
+format: 
+  dashboard:
+    scrolling: true 
+    orientation: columns
+logo: images/ensp_logo1.png
+theme: [minimal]
+fig-width: 10
+fig-height: 5
+fig-asp: 0.5
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| label: load-packages
+#| message: false
+#| warning: false
+#| echo: false
+#| include: false
+
+
+# Forma alternativa de instalar vários pacotes e carregá-los
+
+# SOURCE: https://cedricscherer.netlify.app/2019/05/17/the-evolution-of-a-ggplot-ep
+# Packages
+required_packages <- c("janitor",
+                       "tidyverse",
+                       "rio",
+                       "data.table",
+                       "ggplot2",
+                       "downloadthis",
+                       "DT",
+                       "leaflet",
+                       "scales",
+                       "plotly",
+                       "sf",
+                       "gt",
+                       "skimr",
+                       "sysfonts",
+                       "ggiraph",
+                       "echarts4r",
+                       "DataExplorer",
+                       "readxl",
+                       "gtsummary"
+                       )      
+
+for (pkg in required_packages) {
+  # install packages if not already present
+  if (!pkg %in% rownames(installed.packages())) {
+    install.packages(pkg)
+  }
+  
+  # load packages to this current session 
+  library(pkg, character.only = TRUE)
+}
+remove(required_packages)
+remove(pkg)
+
+# font_add_google("Open Sans")
+# showtext::showtext_auto()
+
+# theme_set(theme_minimal(base_size = 24, base_family = "Open Sans"))
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| results: hide
+
+inquerito_AVC_2024 <- read_excel("datasets/inquerito_AVC_2024_processed.xlsx") |> 
+  clean_names()
+
+names(inquerito_AVC_2024)
+
+#ordenar sempre a altura do questionário
+
+inquerito_AVC_2024$altura_questionario <- factor(inquerito_AVC_2024$altura_questionario, 
+                                                              levels = c("Pré-Intervenção", "Pós-intervenção")) 
+
+```
+
+#  {.sidebar}
+
+Este dashboard mostra estatísticas de uma intervenção no âmbito da Saúde Escolar:
+
+|                           |                             |
+|---------------------------|-----------------------------|
+| **Tipo de Cuidados**      | Cuidados de Saúde Primários |
+| **Desagregação**          | ACES                        |
+| **Âmbito da Intervenção** | AVC                         |
+
+------------------------------------------------------------------------
+
+::: {.callout-note collapse="true"}
+## Nota
+
+Estes dados são reais e confidenciais. Não devem ser partilhados
+
+São propriedade intelectual da USP do extinto ACES Maia/Valongo.
+:::
+
+# Resumo da Intervenção
+
+## Row {height="90%"}
+
+```{r}
+#| content: valuebox
+#| title: "Questionários aplicados"
+#| message: false
+#| warning: false
+list(
+  icon = "person-circle",
+  color = "primary",
+  value = 2137
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Nº escolas"
+#| message: false
+#| warning: false
+list(
+  icon = "pencil",
+  color = "secondary",
+  value = 12
+)
+```
+
+```{r}
+#| content: valuebox
+#| title: "Nº UCC"
+#| message: false
+#| warning: false
+list(
+  icon = "file-medical",
+  color = "light",
+  value = 5
+)
+```
+
+
+# Intervenção {orientation="columns"}
+
+## Column {width="50%"}
+
+```{r}
+
+#| title: Alunos por escola intervencionada
+#| message: false
+#| warning: false
+
+
+summary_inquerito_by_agrupamento <- inquerito_AVC_2024 %>% 
+  summarise(
+    count = n(),
+.by = c(altura_questionario, agrupamento_escolas)
+  ) %>%
+  arrange(altura_questionario)
+
+ggplotly(ggplot(data = summary_inquerito_by_agrupamento, aes(x = agrupamento_escolas,
+                                                    y = count))+
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Número de alunos por agrupamento",
+       x = "Agrupamento",
+       y = "Alunos") +
+  facet_wrap(~altura_questionario)+
+  theme_minimal())
+  
+```
+
+## Column {width="50%"}
+
+```{r}
+
+#| title: Alunos por UCC envolvida
+#| message: false
+#| warning: false
+
+
+summary_inquerito_by_ucc <- inquerito_AVC_2024 %>% 
+  summarise(
+    count = n(),
+.by = c(altura_questionario, ucc), 
+  ) %>%
+  arrange(altura_questionario)
+
+ggplotly(ggplot(data = summary_inquerito_by_ucc, aes(x = ucc,
+                                                    y = count))+
+  geom_bar(stat = "identity", fill = "#de3e3e") +
+  labs(title = "Número de alunos por UCC",
+       x = "UCC",
+       y = "Alunos") +
+    facet_wrap(~altura_questionario)+
+  theme_minimal())
+  
+  
+```
+
+
+# Sumário {orientation="columns"}
+
+## Column 
+
+```{r}
+
+#| title: Sumário
+#| message: false
+#| warning: false
+
+
+tabela1 <- tbl_summary(
+  inquerito_AVC_2024,
+  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), # Selecionar variáveis específicas para o resumo
+  by = altura_questionario, # Dividir a tabela pelo estado da doença cardíaca
+  missing = "no" # Excluir dados ausentes do resumo
+) |> 
+  modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
+  add_n() |>  # Adicionar uma coluna para contar observações não ausentes
+  add_p() |>  # Realizar testes estatísticos para comparar grupos
+  modify_header(label = "**Variable**") # Personalizar o cabeçalho da tabela
+
+```

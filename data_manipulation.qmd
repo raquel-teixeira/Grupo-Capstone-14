@@ -1,0 +1,155 @@
+---
+title: "Manipulação de Dados"
+author: "Hugo Silva e Raquel Teixeira"
+affiliation: 
+    - Escola Nacional de Saúde Pública
+date: today
+date-format: long
+lang: pt 
+format:
+  html:
+    preview: false
+    smooth-scroll: true
+    embed-resources: true
+    toc: true
+    toc-location: left
+    number-sections: true
+    number-depth: 3
+    code_download: true
+    code-copy: true
+    output-file: data_Manipulation.html
+    output-dir: output/documents
+execute:
+  warning: false
+  collapse: true
+  message: false
+  eval: true
+  echo: true
+title-block-style: default
+theme: templata_ensp
+editor: 
+  markdown: 
+    wrap: 72
+project:
+  output-dir: output/documents
+---
+
+# Carregar os pacotes necessários
+
+```{r}
+rm(list = ls(all.names = TRUE)) # limpa todos os objetos, incluindo os ocultos
+
+required_packages <- c("janitor",
+                       "tidyverse",
+                       "rio",
+                       "here",
+                       "haven",
+                       "data.table",
+                       "lubridate",
+                       "readxl",
+                       "broom",
+                       "gt",
+                       "gtsummary"
+                       )      
+
+for (pkg in required_packages) {
+  # install packages if not already present
+  if (!pkg %in% rownames(installed.packages())) {
+    install.packages(pkg)
+  }
+  
+  # load packages to this current session 
+  library(pkg, character.only = TRUE)
+}
+remove(required_packages)
+remove(pkg)
+```
+
+# Carregar a base de dados
+
+```{r}
+inquerito_AVC_2024 <- read_excel("datasets/inquerito_AVC_2024_processed.xlsx") |> 
+  clean_names()
+
+names(inquerito_AVC_2024)
+
+#ordenar sempre a altura do questionário
+
+inquerito_AVC_2024$altura_questionario <- factor(inquerito_AVC_2024$altura_questionario, 
+                                                              levels = c("Pré-Intervenção", "Pós-intervenção")) 
+
+```
+
+```{r}
+
+n_row_pre <- inquerito_AVC_2024 %>%
+  filter(altura_questionario == "Pré-Intervenção") %>%
+  nrow()
+
+n_row_pos <- inquerito_AVC_2024 %>%
+  filter(altura_questionario == "Pós-intervenção") %>%
+  nrow()
+
+```
+
+::: callout-important
+## Total de inquéritos
+
+No total, foram realizados `r n_row_pre` inquéritos pré intervenção e
+`r n_row_pos`inquéritos pós intervenção.
+:::
+
+# Explorar a base de dados
+
+## Contagem de inquéritos por UCC pré e pós-intervenção
+
+```{r}
+
+summary_inquerito_by_ucc <- inquerito_AVC_2024 %>% 
+  summarise(
+    count = n(),
+.by = c(altura_questionario, ucc), 
+  ) %>%
+  arrange(altura_questionario)
+
+summary_inquerito_by_ucc
+
+```
+
+## Contagem de inquéritos respondidos por agrupamento pré e pós-intervenção
+
+```{r}
+summary_inquerito_by_agrupamento <- inquerito_AVC_2024 %>% 
+  summarise(
+    count = n(),
+.by = c(altura_questionario, agrupamento_escolas)
+  ) %>%
+  arrange(altura_questionario)
+
+summary_inquerito_by_agrupamento
+```
+
+## Codificar o sexo
+
+```{r}
+
+str(inquerito_AVC_2024$sexo)
+
+# Recodificar a variável sexo
+inquerito_AVC_2024 <- inquerito_AVC_2024 %>%
+  mutate(
+    sexo_alterado = factor(
+      case_when(
+        sexo == "Feminino" ~ 1,
+        sexo == "Masculino" ~ 2,
+        sexo == "Sem resposta" ~ NA_real_
+      ),
+      levels = c(1, 2),
+      labels = c("Feminino", "Masculino")
+    )
+  )
+
+str(inquerito_AVC_2024$sexo_alterado)
+
+```
+

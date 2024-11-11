@@ -1,0 +1,26 @@
+project:
+  type: website
+
+website:
+  title: "Grupo-Capstone-14"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: data_manipulation.qmd
+        text: Dados
+      - href: data_vision.qmd
+        text: Visualização de Dados
+      - href: model_estatistic.qmd
+        text: Estatística
+      - href: dashboard.qmd
+        text: Dashboard
+      - about.qmd
+
+format:
+  html:
+    theme: [cosmo, custom.scss]
+    toc: true
+
+
+
