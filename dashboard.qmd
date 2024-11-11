@@ -20,43 +20,24 @@ editor_options:
 #| echo: false
 #| include: false
 
+# Lista de pacotes
+packages <- c(
+  "janitor", "tidyverse", "rio", "data.table", "ggplot2", 
+  "downloadthis", "DT", "leaflet", "scales", "plotly", 
+  "sf", "gt", "skimr", "sysfonts", "ggiraph", "echarts4r", 
+  "DataExplorer", "readxl", "gtsummary"
+)
 
-rm(list = ls(all.names = TRUE)) # limpa todos os objetos, incluindo os ocultos
 
-required_packages <- c("janitor",
-                       "tidyverse",
-                       "rio",
-                       "data.table",
-                       "lubridate",
-                       "ggplot2",
-                       "downloadthis",
-                       "readxl",
-                       "broom",
-                       "gt",
-                       "gtsummary",
-                       "DataExplorer",
-                       "leaflet",
-                       "sf",
-                       "plotly",
-                       "igraph"
-                       )
-
-for (pkg in required_packages) {
-  # install packages if not already present
-  if (!pkg %in% rownames(installed.packages())) {
-    install.packages(pkg)
-  }
-  
-  # load packages to this current session 
-  library(pkg, character.only = TRUE)
+# Instala pacotes que ainda não estão instalados
+packages_to_install <- packages[!packages %in% installed.packages()[, "Package"]]
+if(length(packages_to_install) > 0) {
+  install.packages(packages_to_install)
 }
-remove(required_packages)
-remove(pkg)
 
-# font_add_google("Open Sans")
-# showtext::showtext_auto()
+# Função para carregar os pacotes
+lapply(packages, library, character.only = TRUE)
 
-# theme_set(theme_minimal(base_size = 24, base_family = "Open Sans"))
 ```
 
 ```{r}

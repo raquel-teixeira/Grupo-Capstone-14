@@ -17,7 +17,7 @@ format:
     number-depth: 3
     code_download: true
     code-copy: true
-    output-file: data_Manipulation.html
+    output-file: data_manipulation.html
     output-dir: output/documents
 execute:
   warning: false
@@ -39,30 +39,23 @@ project:
 ```{r}
 rm(list = ls(all.names = TRUE)) # limpa todos os objetos, incluindo os ocultos
 
-required_packages <- c("janitor",
-                       "tidyverse",
-                       "rio",
-                       "here",
-                       "haven",
-                       "data.table",
-                       "lubridate",
-                       "readxl",
-                       "broom",
-                       "gt",
-                       "gtsummary"
-                       )      
+# Lista de pacotes
+packages <- c(
+  "janitor", "tidyverse", "rio", "here", "haven", 
+  "data.table", "lubridate", "readxl", "broom", 
+  "gt", "gtsummary"
+)
 
-for (pkg in required_packages) {
-  # install packages if not already present
-  if (!pkg %in% rownames(installed.packages())) {
-    install.packages(pkg)
-  }
-  
-  # load packages to this current session 
-  library(pkg, character.only = TRUE)
+# Instala pacotes que ainda não estão instalados
+packages_to_install <- packages[!packages %in% installed.packages()[, "Package"]]
+if (length(packages_to_install) > 0) {
+  install.packages(packages_to_install)
 }
-remove(required_packages)
-remove(pkg)
+
+# Carrega todos os pacotes
+lapply(packages, library, character.only = TRUE)
+    
+
 ```
 
 # Carregar a base de dados
