@@ -5,7 +5,6 @@ format:
     scrolling: true 
     orientation: columns
 logo: images/ensp_logo1.png
-theme: [minimal]
 fig-width: 10
 fig-height: 5
 fig-asp: 0.5

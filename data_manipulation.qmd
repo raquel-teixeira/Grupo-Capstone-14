@@ -26,7 +26,6 @@ execute:
   eval: true
   echo: true
 title-block-style: default
-theme: templata_ensp
 editor: 
   markdown: 
     wrap: 72
