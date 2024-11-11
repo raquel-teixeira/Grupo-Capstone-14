@@ -164,7 +164,6 @@ ggplotly(ggplot(data = summary_inquerito_by_agrupamento, aes(x = agrupamento_esc
        y = "Alunos") +
   facet_wrap(~altura_questionario)+
   theme_minimal())
-  
 ```
 
 ## Column {width="50%"}
