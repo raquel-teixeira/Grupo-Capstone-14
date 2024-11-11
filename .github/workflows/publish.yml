@@ -38,6 +38,10 @@ jobs:
         run: |
           R -e "install.packages('remotes')"  # Instalar o pacote remotes
 
+      - name: Set up GitHub authentication
+        run: |
+          R -e "gitcreds::gitcreds_set()"  # Configurar o PAT para o GitHub
+
       - name: Install igraph from GitHub
         run: |
           R -e "remotes::install_github('igraph/igraph')"  # Instalar o igraph do GitHub
@@ -47,4 +51,5 @@ jobs:
         with:
           target: gh-pages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Certificar-se de que o token está configurado
+
