@@ -37,7 +37,8 @@ required_packages <- c("janitor",
                        "DataExplorer",
                        "leaflet",
                        "sf",
-                       "plotly"
+                       "plotly",
+                       "igraph"
                        )
 
 for (pkg in required_packages) {
