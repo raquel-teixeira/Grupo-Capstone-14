@@ -425,5 +425,40 @@
     "title": "Manipulação de Dados",
     "section": "3.3 Codificar o sexo",
     "text": "3.3 Codificar o sexo\n\nstr(inquerito_AVC_2024$sexo)\n\n chr [1:2137] \"Feminino\" \"Masculino\" \"Masculino\" \"Masculino\" \"Masculino\" ...\n\n# Recodificar a variável sexo\ninquerito_AVC_2024 &lt;- inquerito_AVC_2024 %&gt;%\n  mutate(\n    sexo_alterado = factor(\n      case_when(\n        sexo == \"Feminino\" ~ 1,\n        sexo == \"Masculino\" ~ 2,\n        sexo == \"Sem resposta\" ~ NA_real_\n      ),\n      levels = c(1, 2),\n      labels = c(\"Feminino\", \"Masculino\")\n    )\n  )\n\nstr(inquerito_AVC_2024$sexo_alterado)\n\n Factor w/ 2 levels \"Feminino\",\"Masculino\": 1 2 2 2 2 1 1 1 1 2 ..."
+  },
+  {
+    "objectID": "dashboard.html",
+    "href": "dashboard.html",
+    "title": "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira",
+    "section": "",
+    "text": "Este dashboard mostra estatísticas de uma intervenção no âmbito da Saúde Escolar:\n\n\n\nTipo de Cuidados\nCuidados de Saúde Primários\n\n\nDesagregação\nACES\n\n\nÂmbito da Intervenção\nAVC\n\n\n\n\n\n\n\n\n\n\nNota\n\n\n\n\n\nEstes dados são reais e confidenciais. Não devem ser partilhados\nSão propriedade intelectual da USP do extinto ACES Maia/Valongo."
+  },
+  {
+    "objectID": "dashboard.html#row",
+    "href": "dashboard.html#row",
+    "title": "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira",
+    "section": "Row",
+    "text": "Row\n\nlist(\n  icon = \"person-circle\",\n  color = \"primary\",\n  value = 2137\n)\n\n$icon\n[1] \"person-circle\"\n\n$color\n[1] \"primary\"\n\n$value\n[1] 2137\n\n\n\nlist(\n  icon = \"pencil\",\n  color = \"secondary\",\n  value = 12\n)\n\n$icon\n[1] \"pencil\"\n\n$color\n[1] \"secondary\"\n\n$value\n[1] 12\n\n\n\nlist(\n  icon = \"file-medical\",\n  color = \"light\",\n  value = 5\n)\n\n$icon\n[1] \"file-medical\"\n\n$color\n[1] \"light\"\n\n$value\n[1] 5"
+  },
+  {
+    "objectID": "dashboard.html#column",
+    "href": "dashboard.html#column",
+    "title": "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira",
+    "section": "Column",
+    "text": "Column\n\n#| title: Alunos por escola intervencionada\n#| message: false\n#| warning: false\n\n\nsummary_inquerito_by_agrupamento &lt;- inquerito_AVC_2024 %&gt;% \n  summarise(\n    count = n(),\n.by = c(altura_questionario, agrupamento_escolas)\n  ) %&gt;%\n  arrange(altura_questionario)\n\nggplotly(ggplot(data = summary_inquerito_by_agrupamento, aes(x = agrupamento_escolas,\n                                                    y = count))+\n  geom_bar(stat = \"identity\", fill = \"skyblue\") +\n  labs(title = \"Número de alunos por agrupamento\",\n       x = \"Agrupamento\",\n       y = \"Alunos\") +\n  facet_wrap(~altura_questionario)+\n  theme_minimal())"
+  },
+  {
+    "objectID": "dashboard.html#column-1",
+    "href": "dashboard.html#column-1",
+    "title": "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira",
+    "section": "Column",
+    "text": "Column\n\n#| title: Alunos por UCC envolvida\n#| message: false\n#| warning: false\n\n\nsummary_inquerito_by_ucc &lt;- inquerito_AVC_2024 %&gt;% \n  summarise(\n    count = n(),\n.by = c(altura_questionario, ucc), \n  ) %&gt;%\n  arrange(altura_questionario)\n\nggplotly(ggplot(data = summary_inquerito_by_ucc, aes(x = ucc,\n                                                    y = count))+\n  geom_bar(stat = \"identity\", fill = \"#de3e3e\") +\n  labs(title = \"Número de alunos por UCC\",\n       x = \"UCC\",\n       y = \"Alunos\") +\n    facet_wrap(~altura_questionario)+\n  theme_minimal())"
+  },
+  {
+    "objectID": "dashboard.html#column-2",
+    "href": "dashboard.html#column-2",
+    "title": "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira",
+    "section": "Column",
+    "text": "Column\n\n#| title: Sumário\n#| message: false\n#| warning: false\n\n\ntabela1 &lt;- tbl_summary(\n  inquerito_AVC_2024,\n  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), # Selecionar variáveis específicas para o resumo\n  by = altura_questionario, # Dividir a tabela pelo estado da doença cardíaca\n  missing = \"no\" # Excluir dados ausentes do resumo\n) |&gt; \n  modify_spanning_header(c(\"stat_1\", \"stat_2\") ~ \"**Intervenção**\") |&gt; \n  add_n() |&gt;  # Adicionar uma coluna para contar observações não ausentes\n  add_p() |&gt;  # Realizar testes estatísticos para comparar grupos\n  modify_header(label = \"**Variable**\") # Personalizar o cabeçalho da tabela"
   }
 ]
