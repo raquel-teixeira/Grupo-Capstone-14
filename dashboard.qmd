@@ -21,30 +21,24 @@ editor_options:
 #| include: false
 
 
-# Forma alternativa de instalar vários pacotes e carregá-los
+rm(list = ls(all.names = TRUE)) # limpa todos os objetos, incluindo os ocultos
 
-# SOURCE: https://cedricscherer.netlify.app/2019/05/17/the-evolution-of-a-ggplot-ep
-# Packages
 required_packages <- c("janitor",
                        "tidyverse",
                        "rio",
                        "data.table",
+                       "lubridate",
                        "ggplot2",
                        "downloadthis",
-                       "DT",
-                       "leaflet",
-                       "scales",
-                       "plotly",
-                       "sf",
-                       "gt",
-                       "skimr",
-                       "sysfonts",
-                       "ggiraph",
-                       "echarts4r",
-                       "DataExplorer",
                        "readxl",
-                       "gtsummary"
-                       )      
+                       "broom",
+                       "gt",
+                       "gtsummary",
+                       "DataExplorer",
+                       "leaflet",
+                       "sf",
+                       "plotly"
+                       )
 
 for (pkg in required_packages) {
   # install packages if not already present
