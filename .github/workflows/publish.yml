@@ -24,10 +24,23 @@ jobs:
         with:
           r-version: '4.2.0'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglpk-dev
+
       - name: Install R Dependencies
         uses: r-lib/actions/setup-renv@v2
         with:
           cache-version: 1
+
+      - name: Install remotes package
+        run: |
+          R -e "install.packages('remotes')"
+
+      - name: Install igraph from GitHub
+        run: |
+          R -e "remotes::install_github('igraph/rigraph')"
 
       - name: Render and Publish
         uses: quarto-dev/quarto-actions/publish@v2
