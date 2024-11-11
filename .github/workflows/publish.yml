@@ -27,7 +27,7 @@ jobs:
       - name: Set up System Dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y libproj-dev libgdal-dev libudunits2-dev  # Adiciona libudunits2-dev para o pacote 'units'
+          sudo apt-get install -y libproj-dev libgdal-dev libudunits2-dev libglpk-dev  # Adiciona libglpk-dev para o pacote 'igraph'
       
       - name: Check renv status
         run: Rscript -e "renv::restore(clean = TRUE)"
