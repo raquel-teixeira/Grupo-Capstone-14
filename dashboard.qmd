@@ -25,7 +25,7 @@ packages <- c(
   "janitor", "tidyverse", "rio", "data.table", "ggplot2", 
   "downloadthis", "DT", "leaflet", "scales", "plotly", 
   "sf", "gt", "skimr", "sysfonts", "ggiraph", "echarts4r", 
-  "DataExplorer", "readxl", "gtsummary"
+  "DataExplorer", "readxl", "gtsummary", "terra"
 )
 
 
