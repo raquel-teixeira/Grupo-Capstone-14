@@ -17,7 +17,7 @@ format:
     number-depth: 3
     code_download: true
     code-copy: true
-    output-file: data_manipulation.html
+    output-file: data_Manipulation.html
     output-dir: output/documents
 execute:
   warning: false
