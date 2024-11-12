@@ -180,21 +180,20 @@ ggplotly(ggplot(data = summary_inquerito_by_ucc, aes(x = ucc,
 ## Column 
 
 ```{r}
-
 #| title: Sumário
 #| message: false
 #| warning: false
+#| results: asis
 
 
 tabela1 <- tbl_summary(
   inquerito_AVC_2024,
   include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), # Selecionar variáveis específicas para o resumo
   by = altura_questionario, # Dividir a tabela pelo estado da doença cardíaca
-  missing = "no" # Excluir dados ausentes do resumo
+  missing = "no"
 ) |> 
   modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
   add_n() |>  # Adicionar uma coluna para contar observações não ausentes
   add_p() |>  # Realizar testes estatísticos para comparar grupos
-  modify_header(label = "**Variable**") # Personalizar o cabeçalho da tabela
-
+  modify_header(label = "**Variable**") 
 ```
