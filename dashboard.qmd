@@ -508,7 +508,7 @@ fig_ambulancia
 
 # Sumário {orientation="columns"}
 
-## Column 
+## Column {width="100%"}
 
 ```{r}
 #| title: Sumário
@@ -530,6 +530,6 @@ tabela1 <- tbl_summary(
   modify_header(label = "**Variável**") |> 
   as_flex_table()  
 
-
+tabela1
 
 ```
