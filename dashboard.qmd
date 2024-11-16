@@ -526,7 +526,6 @@ tabela1 <- tbl_summary(
 ) |> 
   modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
   add_n() |> 
-  add_p() |> 
   modify_header(label = "**Variável**") |> 
   as_flex_table()  
 

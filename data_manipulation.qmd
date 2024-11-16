@@ -36,6 +36,7 @@ project:
 # Carregar os pacotes necessários
 
 ```{r}
+
 rm(list = ls(all.names = TRUE)) # limpa todos os objetos, incluindo os ocultos
 
 # Lista de pacotes
