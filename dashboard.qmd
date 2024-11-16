@@ -514,35 +514,22 @@ fig_ambulancia
 #| title: Sumário
 #| message: false
 #| warning: false
-<<<<<<< HEAD
 #| echo: false  # Oculta o código, exibe apenas a tabela
 #| output: asis
-=======
 #| results: asis
->>>>>>> 996e4ab104846d47991266f13031a2b71991300e
-
 
 tabela1 <- tbl_summary(
   inquerito_AVC_2024,
-<<<<<<< HEAD
-  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), 
+  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia),
   by = altura_questionario,
   missing = "no"
 ) |> 
   modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
-  add_n() |>  
-  add_p() |>  
+  add_n() |> 
+  add_p() |> 
   modify_header(label = "**Variável**") |> 
-  as_flex_table() 
+  as_flex_table()  
 
-=======
-  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), # Selecionar variáveis específicas para o resumo
-  by = altura_questionario, # Dividir a tabela pelo estado da doença cardíaca
-  missing = "no"
-) |> 
-  modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
-  add_n() |>  # Adicionar uma coluna para contar observações não ausentes
-  add_p() |>  # Realizar testes estatísticos para comparar grupos
-  modify_header(label = "**Variable**") 
->>>>>>> 996e4ab104846d47991266f13031a2b71991300e
+
+
 ```
