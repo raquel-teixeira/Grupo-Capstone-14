@@ -1,5 +1,5 @@
 ---
-title: "Dashboard Intervenção AVC - Hugo Silva e Raquel Teixeira"
+title: "Dashboard - Intervenção AVC"
 format: 
   dashboard:
     scrolling: true 
@@ -21,11 +21,29 @@ editor_options:
 
 # Lista de pacotes
 packages <- c(
-  "janitor", "tidyverse", "rio", "data.table", "ggplot2", 
-  "downloadthis", "DT", "leaflet", "scales", "plotly", 
-  "sf", "gt", "skimr", "sysfonts", "ggiraph", "echarts4r", 
-  "DataExplorer", "readxl", "gtsummary", "terra"
-)
+                "janitor", 
+                "tidyverse", 
+                "rio", 
+                "data.table", 
+                "ggplot2", 
+                "downloadthis", 
+                "DT", 
+                "leaflet", 
+                "scales", 
+                "plotly", 
+                "sf", 
+                "gt", 
+                "skimr", 
+                "sysfonts", 
+                "ggiraph", 
+                "echarts4r",
+                "DataExplorer", 
+                "readxl", 
+                "gtsummary", 
+                "broom",
+                "terra",
+                "flextable"
+                )
 
 
 # Instala pacotes que ainda não estão instalados
@@ -50,10 +68,30 @@ inquerito_AVC_2024 <- read_excel("datasets/inquerito_AVC_2024_processed.xlsx") |
 
 names(inquerito_AVC_2024)
 
+
+#Adicionar a coluna 
+inquerito_AVC_2024 <- inquerito_AVC_2024 %>%
+  add_row(altura_questionario = "Pré-Intervenção",
+          ucc = "D",
+          sexo = NA,
+          agrupamento_escolas = "D3",
+          orgao_afetado = "Sem resposta",
+          sim_fs = NA,
+          desvio_face = NA,
+          dificuldade_fala = NA,
+          falta_forca_braco = NA,
+          imediatamente_avc = NA, 
+          fr_fumar = NA,
+          fr_sal_gorduras = NA,
+          fr_sem_atividade = NA, 
+          fator_risco_avc_todos = NA, 
+          numero_emergencia = NA
+          )
+
 #ordenar sempre a altura do questionário
 
 inquerito_AVC_2024$altura_questionario <- factor(inquerito_AVC_2024$altura_questionario, 
-                                                              levels = c("Pré-Intervenção", "Pós-intervenção")) 
+                                                  levels = c("Pré-Intervenção", "Pós-intervenção")) 
 
 ```
 
@@ -120,60 +158,353 @@ list(
 
 # Intervenção {orientation="columns"}
 
-## Column {width="50%"}
+## Column
 
 ```{r}
 
-#| title: Alunos por escola intervencionada
+#| title: Respostas obtidas pelas UCC's
+#| message: false
+#| warning: false
+
+# Agrupar e resumir dados
+combined_data <- inquerito_AVC_2024 %>%
+  group_by(altura_questionario, ucc, agrupamento_escolas) %>%
+  summarise(count = n(), .groups = "drop")
+
+
+# Inicializar a figura
+fig_agrup <- plot_ly()
+
+# Obter listas únicas de UCC e Agrupamentos de Escolas
+uccs <- unique(combined_data$ucc)
+agrupamentos <- unique(combined_data$agrupamento_escolas)
+
+# Adicionar cada combinação UCC + Agrupamento como um *trace* separado
+for (i in seq_along(uccs)) {
+  for (j in seq_along(agrupamentos)) {
+    data_trace <- combined_data %>% 
+      filter(ucc == uccs[i] & agrupamento_escolas == agrupamentos[j])
+    
+    fig_agrup <- fig_agrup %>% 
+      add_trace(
+        data = data_trace,
+        x = ~altura_questionario, 
+        y = ~count, 
+        type = 'bar', 
+        name = paste(agrupamentos[j]),
+        text = ~paste(count),
+        textposition = 'auto',
+        hoverinfo = 'text',
+        color = ~agrupamento_escolas,  # Agrupamentos usados para diferenciar cores
+        colors = c("A1" = "#B0C4DE", 
+                   "A2" = "#CAE1FF", 
+                   "B1" = "#87CEFA", 
+                   "B2" = "#A4D3EE", 
+                   "C1" = "#FFA07A", 
+                   "C2" = "#FFA07A", 
+                   "C3" = "#EE9572", 
+                   "D1" = "#DEDEDE", 
+                   "D2" = "#CFCFCF", 
+                   "D3" = "#CDC9C9", 
+                   "D4" = "#8B8989", 
+                   "E1" = "pink", 
+                   "E2" = "pink3", 
+                   "E3" = "pink4"),
+        visible = ifelse(i == 1, TRUE, FALSE)  # Exibir apenas a primeira UCC no início
+      )
+  }
+}
+
+# Configurar o layout e o menu dropdown
+fig_agrup <- fig_agrup %>%
+  layout(
+    title = "Respostas Obtidas pelas UCC's",
+    xaxis = list(title = "Altura do Questionário"),
+    yaxis = list(title = "Contagem de respostas"),
+    barmode = 'group',
+    
+    # Menu para selecionar UCC
+    updatemenus = list(
+      list(
+        type = "dropdown",
+        active = 0,
+        buttons = lapply(seq_along(uccs), function(i) {
+          list(
+            method = "update",
+            args = list(
+              list(visible = rep(uccs[i] == uccs, each = length(agrupamentos))),
+              list(title = paste("Respostas obtidas pela UCC", uccs[i]))
+            ),
+            label = paste("UCC", uccs[i])
+          )
+        }) %>% append(list(
+                           list(
+                                method = "update",
+                                args = list(
+                                            list(visible = rep(TRUE, 
+                                              length(uccs) * length(agrupamentos))),
+                      list(title = "Respostas obtidas por todas as UCC's")),
+            label = "Todas as UCC's")
+        ))
+      )
+    ),
+    showlegend = TRUE,
+     legend = list(title = list(
+                                text = "Agrupamentos de Escolas",  # Título da legenda
+                                font = list(size = 14),
+                                side = "top")))
+
+
+fig_agrup
+```
+
+
+# Respostas ao questionário {orientation="row"}
+
+## Row {width="50%"}
+```{r}
+
+#| title: Qual o orgão afetado pelo AVC?
+#| message: false
+#| warning: false
+
+# Processamento dos dados
+orgao <- inquerito_AVC_2024 %>%
+  mutate(cerebro = ifelse(orgao_afetado == "Cérebro", "Cérebro", "Outra resposta")) %>%
+  group_by(altura_questionario, ucc, agrupamento_escolas) %>%
+  summarise(
+    total_respostas = n(),
+    cerebro_count = sum(cerebro == "Cérebro"),
+    cerebro_percent = round(cerebro_count / total_respostas * 100, 1),
+    .groups = "drop"
+  )
+
+fig_orgao <- plot_ly()
+
+# Obter todas as combinações de UCC e agrupamento de escolas
+uccs <- unique(orgao$ucc)
+agrupamentos <- unique(orgao$agrupamento_escolas)
+
+# Adicionar cada combinação UCC + Agrupamento como um *trace* separado
+for (i in seq_along(uccs)) {
+  for (j in seq_along(agrupamentos)) {
+    data_trace <- orgao %>% 
+      filter(ucc == uccs[i] & agrupamento_escolas == agrupamentos[j])
+    
+    fig_orgao <- fig_orgao %>% 
+      add_trace(
+        data = data_trace,
+        x = ~altura_questionario, 
+        y = ~cerebro_count, 
+        type = 'bar', 
+        name = paste(agrupamentos[j]),
+        text = ~paste(round(cerebro_percent, 1), "%"),
+        textposition = 'auto',
+        hoverinfo = 'text',
+        color = ~agrupamento_escolas,  # Agrupamentos usados para diferenciar cores
+                  colors = c("A1" = "#B0C4DE", 
+                             "A2" = "#CAE1FF", 
+                             "B1" = "#87CEFA", 
+                             "B2" = "#A4D3EE", 
+                             "C1" = "#FFA07A", 
+                             "C2" = "#FFA07A", 
+                             "C3" = "#EE9572", 
+                             "D1" = "#DEDEDE", 
+                             "D2" = "#CFCFCF", 
+                             "D3" = "#CDC9C9", 
+                             "D4" = "#8B8989", 
+                             "E1" = "pink", 
+                             "E2" = "pink3", 
+                             "E3" = "pink4"),
+        visible = ifelse(i == 1, TRUE, FALSE)  # Exibir apenas a primeira UCC no início
+      )
+  }
+}
+
+# Configurar apenas o menu dropdown para selecionar UCC
+fig_orgao <- fig_orgao %>%
+  layout(
+    title = "Qual o órgão afetado pelo AVC?",
+    xaxis = list(title = "Altura do Questionário"),
+    yaxis = list(title = "Percentagem de respostas corretas"),
+    barmode = 'group',
+    
+    # Menu para selecionar UCC
+    updatemenus = list(
+      list(
+        type = "dropdown",
+        active = 0,
+        buttons = lapply(seq_along(uccs), function(i) {
+          list(
+            method = "update",
+            args = list(
+              list(visible = rep(uccs[i] == uccs, each = length(agrupamentos))),
+              list(title = paste("Respostas corretas obtidas pela UCC", uccs[i]))
+            ),
+            label = paste("UCC", uccs[i])
+          )
+        }) %>% append(list(
+                           list(
+                                method = "update",
+                                args = list(
+                                            list(visible = rep(TRUE, 
+                                              length(uccs) * length(agrupamentos))),
+                      list(title = "Respostas corretas obtidas por todas as UCC's")),
+            label = "Todas as UCC's")
+        ))
+      )
+    ),
+    showlegend = TRUE,
+     legend = list(title = list(
+                                text = "Agrupamentos de Escolas",  # Título da legenda
+                                font = list(size = 14),
+                                side = "top")))
+
+
+fig_orgao
+
+
+
+```
+
+### Column {width="55%"} 
+```{r}
+
+#| title: Quais os sinais e sintomas de um AVC?
 #| message: false
 #| warning: false
 
 
-summary_inquerito_by_agrupamento <- inquerito_AVC_2024 %>% 
-  summarise(
-    count = n(),
-.by = c(altura_questionario, agrupamento_escolas)
-  ) %>%
-  arrange(altura_questionario)
 
-ggplotly(ggplot(data = summary_inquerito_by_agrupamento, aes(x = agrupamento_escolas,
-                                                    y = count))+
-  geom_bar(stat = "identity", fill = "skyblue") +
-  labs(title = "Número de alunos por agrupamento",
-       x = "Agrupamento",
-       y = "Alunos") +
-  facet_wrap(~altura_questionario)+
-  theme_minimal())
 ```
 
-## Column {width="50%"}
-
+### Column {width="25%"}
 ```{r}
 
-#| title: Alunos por UCC envolvida
+#| title: O que fazer quando detetamos um AVC?
 #| message: false
 #| warning: false
 
 
-summary_inquerito_by_ucc <- inquerito_AVC_2024 %>% 
-  summarise(
-    count = n(),
-.by = c(altura_questionario, ucc), 
-  ) %>%
-  arrange(altura_questionario)
 
-ggplotly(ggplot(data = summary_inquerito_by_ucc, aes(x = ucc,
-                                                    y = count))+
-  geom_bar(stat = "identity", fill = "#de3e3e") +
-  labs(title = "Número de alunos por UCC",
-       x = "UCC",
-       y = "Alunos") +
-    facet_wrap(~altura_questionario)+
-  theme_minimal())
-  
-  
 ```
 
+### Column {width="25%"}
+```{r}
+
+#| title: Quais os fatores de risco do AVC?
+#| message: false
+#| warning: false
+
+
+
+```
+
+## Row {width="50%"}
+```{r}
+
+#| title: Qual o número que devemos ligar para uma emergência?
+#| message: false
+#| warning: false
+
+
+# Processamento dos dados
+ambulancia <- inquerito_AVC_2024 %>%
+  mutate(ambulancia = ifelse(numero_emergencia == "112", "112", "Outra resposta")) %>%
+  group_by(altura_questionario, ucc, agrupamento_escolas) %>%
+  summarise(
+    total_respostas = n(),
+    ambulancia_count = sum(ambulancia == "112"),
+    ambulancia_percent = round(ambulancia_count / total_respostas * 100, 1),
+    .groups = "drop"
+  )
+
+fig_ambulancia <- plot_ly()
+
+# Obter todas as combinações de UCC e agrupamento de escolas
+uccs <- unique(ambulancia$ucc)
+agrupamentos <- unique(ambulancia$agrupamento_escolas)
+
+# Adicionar cada combinação UCC + Agrupamento como um *trace* separado
+for (i in seq_along(uccs)) {
+  for (j in seq_along(agrupamentos)) {
+    data_trace <- ambulancia %>% 
+      filter(ucc == uccs[i] & agrupamento_escolas == agrupamentos[j])
+    
+    fig_ambulancia <- fig_ambulancia %>% 
+      add_trace(
+        data = data_trace,
+        x = ~altura_questionario, 
+        y = ~ambulancia_count, 
+        type = 'bar', 
+        name = paste(agrupamentos[j]),
+        text = ~paste(round(ambulancia_percent, 1), "%"),
+        textposition = 'auto',
+        hoverinfo = 'text',
+        color = ~agrupamento_escolas,  # Agrupamentos usados para diferenciar cores
+                  colors = c("A1" = "#B0C4DE", 
+                             "A2" = "#CAE1FF", 
+                             "B1" = "#87CEFA", 
+                             "B2" = "#A4D3EE", 
+                             "C1" = "#FFA07A", 
+                             "C2" = "#FFA07A", 
+                             "C3" = "#EE9572", 
+                             "D1" = "#DEDEDE", 
+                             "D2" = "#CFCFCF", 
+                             "D3" = "#CDC9C9", 
+                             "D4" = "#8B8989", 
+                             "E1" = "pink", 
+                             "E2" = "pink3", 
+                             "E3" = "pink4"),
+        visible = ifelse(i == 1, TRUE, FALSE)  # Exibir apenas a primeira UCC no início
+      )
+  }
+}
+
+# Configurar apenas o menu dropdown para selecionar UCC
+fig_ambulancia <- fig_ambulancia %>%
+  layout(
+    title = "Qual o número que devemos ligar para uma emergência?",
+    xaxis = list(title = "Altura do Questionário"),
+    yaxis = list(title = "Percentagem de respostas corretas"),
+    barmode = 'group',
+    
+    # Menu para selecionar UCC
+    updatemenus = list(
+      list(
+        type = "dropdown",
+        active = 0,
+        buttons = lapply(seq_along(uccs), function(i) {
+          list(
+            method = "update",
+            args = list(
+              list(visible = rep(uccs[i] == uccs, each = length(agrupamentos))),
+              list(title = paste("Respostas corretas obtidas pela UCC", uccs[i]))
+            ),
+            label = paste("UCC", uccs[i])
+          )
+        }) %>% append(list(
+                           list(
+                                method = "update",
+                                args = list(
+                                            list(visible = rep(TRUE, 
+                                              length(uccs) * length(agrupamentos))),
+                      list(title = "Respostas corretas obtidas por todas as UCC's")),
+            label = "Todas as UCC's")
+        ))
+      )
+    ),
+    showlegend = TRUE,
+     legend = list(title = list(
+                                text = "Agrupamentos de Escolas",  # Título da legenda
+                                font = list(size = 14),
+                                side = "top")))
+
+
+fig_ambulancia
+
+
+```
 
 # Sumário {orientation="columns"}
 
@@ -184,17 +515,20 @@ ggplotly(ggplot(data = summary_inquerito_by_ucc, aes(x = ucc,
 #| title: Sumário
 #| message: false
 #| warning: false
+#| echo: false  # Oculta o código, exibe apenas a tabela
+#| output: asis
 
 
 tabela1 <- tbl_summary(
   inquerito_AVC_2024,
-  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), # Selecionar variáveis específicas para o resumo
-  by = altura_questionario, # Dividir a tabela pelo estado da doença cardíaca
-  missing = "no" # Excluir dados ausentes do resumo
+  include = c(sexo, ucc, agrupamento_escolas, numero_emergencia), 
+  by = altura_questionario,
+  missing = "no"
 ) |> 
   modify_spanning_header(c("stat_1", "stat_2") ~ "**Intervenção**") |> 
-  add_n() |>  # Adicionar uma coluna para contar observações não ausentes
-  add_p() |>  # Realizar testes estatísticos para comparar grupos
-  modify_header(label = "**Variable**") # Personalizar o cabeçalho da tabela
+  add_n() |>  
+  add_p() |>  
+  modify_header(label = "**Variável**") |> 
+  as_flex_table() 
 
 ```

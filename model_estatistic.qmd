@@ -17,7 +17,6 @@ format:
     number-depth: 3
     code_download: true
     code-copy: true
-    output-dir: output/documents
 execute:
   warning: false
   collapse: true
